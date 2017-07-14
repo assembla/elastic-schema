@@ -23,7 +23,7 @@ module ElasticSchema
 
     # Creates the indices/types and raise an exception if the any of the indices/types already exists
     def create
-      opts = { client: client, analysis_files: analysis_files, schema_files: schema_files }
+      opts = { client: client, analysis_files: analysis_files, schema_files: schema_files, ingestion_files: ingestion_files }
       opts.update(bulk_size: bulk_size) if bulk_size
       Schema::Migration.new(opts).load_definitions.run
     end
@@ -36,12 +36,20 @@ module ElasticSchema
       (schema_dir ? Dir[analysis_pattern] : [analysis_file]).compact
     end
 
+    def ingestion_files
+      (schema_dir ? Dir[ingestion_pattern] : [analysis_file]).compact
+    end
+
     def schema_pattern
       File.join(schema_dir, '*.schema.rb')
     end
 
     def analysis_pattern
       File.join(schema_dir, '{analysis.rb,*.analysis.rb}')
+    end
+
+    def ingestion_pattern
+      File.join(schema_dir, '*.ingestion.rb')
     end
   end
 end

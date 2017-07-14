@@ -7,6 +7,10 @@ module ElasticSchema
   autoload :Command, 'elastic-schema/command'
 
   module Schema
+    module Ingestion
+      autoload :Pipeline, 'elastic-schema/schema/ingestion/pipeline'
+    end
+
     autoload :Definition, 'elastic-schema/schema/definition'
     autoload :Migration,  'elastic-schema/schema/migration'
     autoload :Field,      'elastic-schema/schema/field'

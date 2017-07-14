@@ -5,20 +5,22 @@ module ElasticSchema::Schema
     BULK_SIZE = 1000
 
     attr_reader :schema_files, :client, :actual_schemas, :timestamp, :analysis_files,
-                :bulk_size
+                :ingestion_files, :bulk_size
 
     def initialize(options)
-      @client         = options[:client]
-      @analysis_files = options[:analysis_files]
-      @schema_files   = options[:schema_files]
-      @bulk_size      = (options[:bulk_size] || BULK_SIZE).to_i
-      @actual_schemas = {}
-      @timestamp      = Time.new.to_i
+      @client          = options[:client]
+      @analysis_files  = options[:analysis_files]
+      @schema_files    = options[:schema_files]
+      @ingestion_files = options[:ingestion_files]
+      @bulk_size       = (options[:bulk_size] || BULK_SIZE).to_i
+      @actual_schemas  = {}
+      @timestamp       = Time.new.to_i
     end
 
     def load_definitions
       analysis_files.each { |schema_file| require schema_file }
       schema_files.each { |schema_file| require schema_file }
+      ingestion_files.each { |ingestion_file| require ingestion_file }
       self
     end
 
@@ -37,6 +39,7 @@ module ElasticSchema::Schema
         puts "There are no schemas to be processed in the provided directory."
       end
 
+      create_or_update_ingestion
       create_or_update_indices(schemas_to_update)
     end
 
@@ -58,6 +61,12 @@ module ElasticSchema::Schema
           create_index(new_index, index_body)
           alias_index(new_index, index_name)
         end
+      end
+    end
+
+    def create_or_update_ingestion
+      pipelines.each do |name, pipeline|
+        client.ingest.put_pipeline(id: name, body: pipeline.to_hash)
       end
     end
 
@@ -259,6 +268,10 @@ module ElasticSchema::Schema
 
     def schemas
       @schemas ||= ElasticSchema::Schema::Definition.definitions
+    end
+
+    def pipelines
+      @pipelines ||= ElasticSchema::Schema::Ingestion::Pipeline.pipelines
     end
   end
 end
