@@ -113,7 +113,14 @@ module ElasticSchema::Schema
 
       puts "Migrating #{doc_count} documents from type '#{type}' in index '#{old_index}' to index '#{new_index}'"
 
-      result         = client.search index: old_index, type: type, search_type: 'scan', scroll: '1m', size: bulk_size
+      result = client.search(
+        index: old_index,
+        type: type,
+        sort: ['_doc'],
+        scroll: '1m',
+        size: bulk_size
+      )
+
       alias_name     = new_index.split("_")[0..-2].join("_")
       fields_filter  = fields_whilelist(alias_name, type)
 
