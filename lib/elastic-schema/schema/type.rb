@@ -12,6 +12,10 @@ module ElasticSchema::Schema
       fields << Field.new(field_name, field_type, opts, &block)
     end
 
+    def routing(options)
+      fields.routing(options)
+    end
+
     def fields
       @fields ||= FieldsSet.new(self)
     end

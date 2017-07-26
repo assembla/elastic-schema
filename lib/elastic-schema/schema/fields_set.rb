@@ -17,6 +17,10 @@ module ElasticSchema::Schema
       fields << field
     end
 
+    def routing(options)
+      @routing_options = options
+    end
+
     def find(field_name)
       fields.bsearch { |field| field.name == field_name }
     end
@@ -27,7 +31,10 @@ module ElasticSchema::Schema
 
     def to_hash
       return {} if fields.empty?
-      { 'properties' => fields.inject({}) { |_fields, field| _fields.update(field.to_hash) } }
+      hash = { 'properties' => fields.inject({}) { |_fields, field| _fields.update(field.to_hash) } }
+      hash.update('_routing' => @routing_options) if @routing_options.present?
+
+      hash
     end
   end
 

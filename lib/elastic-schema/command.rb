@@ -1,3 +1,5 @@
+require 'logger'
+
 module ElasticSchema
 
   class Command
@@ -7,7 +9,7 @@ module ElasticSchema
 
     def initialize(options)
       @options       = options
-      @client        = Elasticsearch::Client.new(host: options[:host])
+      @client        = Elasticsearch::Client.new(host: options[:host], logger: Logger.new(STDOUT))
       @root          = File.expand_path(options[:root])
       @schema_dir    = File.join(@root, options[:schema_dir]) if options[:schema_dir]
       @schema_file   = File.join(@root, options[:schema_file]) if options[:schema_file]
